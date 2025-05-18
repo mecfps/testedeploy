@@ -9,7 +9,9 @@ export function DebugScript() {
     // Verificar sessão
     const checkSession = async () => {
       try {
-        const supabase = (window as any).supabase
+        /* const supabase = (window as any).supabase */
+        import { createClientSupabaseClient } from "@/lib/supabase"
+        const supabase = createClientSupabaseClient()
 
         if (!supabase) {
           console.log("Supabase client not found in window object")
