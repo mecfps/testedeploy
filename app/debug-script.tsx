@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { createClientSupabaseClient } from "@/lib/supabase"
 
 export function DebugScript() {
   useEffect(() => {
@@ -10,7 +11,7 @@ export function DebugScript() {
     const checkSession = async () => {
       try {
         /* const supabase = (window as any).supabase */
-        import { createClientSupabaseClient } from "@/lib/supabase"
+        
         const supabase = createClientSupabaseClient()
 
         if (!supabase) {
