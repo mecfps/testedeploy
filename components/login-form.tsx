@@ -3,8 +3,8 @@
 import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { createClientSupabaseClient } from "@/lib/supabase"
+import { redirectBasedOnTenants } from "@/lib/auth"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function LoginForm() {
   const supabase = createClientSupabaseClient()
-  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -26,36 +25,34 @@ export function LoginForm() {
     e.preventDefault()
     setError(null)
     setIsLoading(true)
-
+  
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-
+  
       if (error) {
         console.error("Login error:", error.message)
-        if (error.message.includes("Invalid login credentials")) {
-          setError("E-mail ou senha incorretos.")
-        } else if (error.message.includes("Email not confirmed")) {
-          setError("E-mail não confirmado. Verifique sua caixa de entrada.")
-        } else {
-          setError(error.message)
-        }
+        setError("E-mail ou senha incorretos.")
         setIsLoading(false)
         return
       }
-
+  
       if (!data.user) {
         setError("Erro ao autenticar usuário.")
         setIsLoading(false)
         return
       }
-
+  
       console.log("User authenticated:", data.user.id)
-
-      // ✅ Redirecionamento direto após login
+  
+      // ✅ Redireciona com router do client
       router.push("/dashboard")
+  
+      // ou como fallback se nada funcionar:
+      // window.location.href = "/dashboard"
+  
     } catch (err) {
       console.error("Unexpected error during login:", err)
       setError("Ocorreu um problema de conexão. Tente novamente.")
