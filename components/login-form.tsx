@@ -3,8 +3,8 @@
 import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { createClientSupabaseClient } from "@/lib/supabase"
-import { redirectBasedOnTenants } from "@/lib/auth"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function LoginForm() {
   const supabase = createClientSupabaseClient()
+  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -27,7 +28,6 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      // Realizar login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -54,17 +54,12 @@ export function LoginForm() {
 
       console.log("User authenticated:", data.user.id)
 
-      // Redirecionar com base nos tenants
-      try {
-        await redirectBasedOnTenants()
-      } catch (err) {
-        console.error("Error redirecting:", err)
-        setError("Erro ao redirecionar. Tente novamente.")
-        setIsLoading(false)
-      }
+      // ✅ Redirecionamento direto após login
+      router.push("/dashboard")
     } catch (err) {
       console.error("Unexpected error during login:", err)
       setError("Ocorreu um problema de conexão. Tente novamente.")
+    } finally {
       setIsLoading(false)
     }
   }
