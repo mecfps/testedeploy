@@ -1,9 +1,8 @@
 "use client"
 
-import type React from "react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation" // <-- IMPORTANTE!
 import { createClientSupabaseClient } from "@/lib/supabase"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
@@ -13,8 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function LoginForm() {
-  const router = useRouter() // <-- AQUI ESTAVA FALTANDO
   const supabase = createClientSupabaseClient()
+  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -48,11 +47,10 @@ export function LoginForm() {
 
       console.log("User authenticated:", data.user.id)
 
-      // ✅ Redireciona corretamente após login
+      // ✅ Redireciona para o dashboard
       router.push("/dashboard")
-
     } catch (err) {
-      console.error("Erro inesperado:", err)
+      console.error("Unexpected error during login:", err)
       setError("Ocorreu um problema de conexão. Tente novamente.")
     } finally {
       setIsLoading(false)
