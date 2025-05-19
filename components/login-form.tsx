@@ -1,9 +1,10 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { createClientSupabaseClient } from "@/lib/supabase"
+import { redirectBasedOnTenants } from "@/lib/auth"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -13,7 +14,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function LoginForm() {
   const supabase = createClientSupabaseClient()
-  const router = useRouter()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -27,6 +27,7 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
+      // Realizar login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -34,7 +35,13 @@ export function LoginForm() {
 
       if (error) {
         console.error("Login error:", error.message)
-        setError("E-mail ou senha incorretos.")
+        if (error.message.includes("Invalid login credentials")) {
+          setError("E-mail ou senha incorretos.")
+        } else if (error.message.includes("Email not confirmed")) {
+          setError("E-mail não confirmado. Verifique sua caixa de entrada.")
+        } else {
+          setError(error.message)
+        }
         setIsLoading(false)
         return
       }
@@ -47,12 +54,17 @@ export function LoginForm() {
 
       console.log("User authenticated:", data.user.id)
 
-      // ✅ Redireciona para o dashboard
-      router.push("/dashboard")
+      // Redirecionar com base nos tenants
+      try {
+        await redirectBasedOnTenants()
+      } catch (err) {
+        console.error("Error redirecting:", err)
+        setError("Erro ao redirecionar. Tente novamente.")
+        setIsLoading(false)
+      }
     } catch (err) {
       console.error("Unexpected error during login:", err)
       setError("Ocorreu um problema de conexão. Tente novamente.")
-    } finally {
       setIsLoading(false)
     }
   }
