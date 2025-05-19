@@ -1,5 +1,5 @@
 import { cookies } from "next/headers"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createServerComponentClient } from "@supabase/ssr"
 
 // Função para criar cliente no lado do servidor com cookies
 // Esta função só deve ser importada em Server Components
